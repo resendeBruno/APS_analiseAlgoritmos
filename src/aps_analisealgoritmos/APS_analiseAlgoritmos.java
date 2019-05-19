@@ -10,7 +10,7 @@ package aps_analisealgoritmos;
  * @author bruno
  */
 public class APS_analiseAlgoritmos {
-    public static int chamadas;
+    public static int calls;
 
     /**
      * @param args the command line arguments
@@ -18,125 +18,155 @@ public class APS_analiseAlgoritmos {
     public static void main(String[] args) {
         int[] vetor, vetor2 = null;
         
+        printArray(mergeSort(createArray(60, 11, 99)));
+        
         vetor = createArray(1000, 1, 100);
         vetor2 = new int[vetor.length];
         System.arraycopy(vetor, 0, vetor2, 0, vetor.length);
-        chamadas = 0;
-        quicksort2(vetor2);
-        int chamadas1k = chamadas;
-        long tempo1k = quicksort(vetor);
+        int calls1k = mergeSort2(vetor2);
+        long tempo1k = mergeSort3(vetor);
         
         vetor = createArray(2000, 1, 100);
         vetor2 = new int[vetor.length];
         System.arraycopy(vetor, 0, vetor2, 0, vetor.length);
-        chamadas = 0;
-        quicksort2(vetor2);
-        int chamadas2k = chamadas;
-        long tempo2k = quicksort(vetor);
+        int calls2k = mergeSort2(vetor2);
+        long tempo2k = mergeSort3(vetor);
         
         vetor = createArray(5000, 1, 100);
         vetor2 = new int[vetor.length];
         System.arraycopy(vetor, 0, vetor2, 0, vetor.length);
-        chamadas = 0;
-        quicksort2(vetor2);
-        int chamadas5k = chamadas;
-        long tempo5k = quicksort(vetor);
+        int calls5k = mergeSort2(vetor2);
+        long tempo5k = mergeSort3(vetor);
         
         vetor = createArray(10000, 1, 100);
         vetor2 = new int[vetor.length];
         System.arraycopy(vetor, 0, vetor2, 0, vetor.length);
-        chamadas = 0;
-        quicksort2(vetor2);
-        int chamadas10k = chamadas;
-        long tempo10k = quicksort(vetor);
+        int calls10k = mergeSort2(vetor2);
+        long tempo10k = mergeSort3(vetor);
         
-        System.out.println("1000 - tempo " + tempo1k + " ns (" + (tempo1k * 0.000001) + " ms) e " + chamadas1k + " chamadas recursivas");
-        System.out.println("2000 - tempo " + tempo2k + " ns (" + (tempo2k * 0.000001) + " ms) e " + chamadas2k + " chamadas recursivas");
-        System.out.println("5000 - tempo " + tempo5k + " ns (" + (tempo5k * 0.000001) + " ms) e " + chamadas5k + " chamadas recursivas");
-        System.out.println("10000 - tempo " + tempo10k + " ns (" + (tempo10k * 0.000001) + " ms) e " + chamadas10k + " chamadas recursivas");
+        System.out.println("MergeSort");
+        System.out.println("n = 1000 / " + calls1k + " chamadas recursivas e " + tempo1k + " ns (" + (tempo1k * 0.000001) + " ms)");
+        System.out.println("n = 2000 / " + calls2k + " chamadas recursivas e " + tempo2k + " ns (" + (tempo2k * 0.000001) + " ms)");
+        System.out.println("n = 5000 / " + calls5k + " chamadas recursivas e " + tempo5k + " ns (" + (tempo5k * 0.000001) + " ms)");
+        System.out.println("n = 10000 / " + calls10k + " chamadas recursivas e " + tempo10k + " ns (" + (tempo10k * 0.000001) + " ms)");
     }
     
     /**
-     * Ordena um vetor usando o algoritmo QuickSort
-     *
-     * Pior caso - O(n²) 
-     * Melhor caso - O(n log n) 
-     * Caso médio - O(n log n) 
-     * Espaço necessário - O(1)
-     *
-     * @param vetor Vetor que será ordenado
+     * Ordena vetor de inteiros usando o algoritmo mergesort 
      * 
-     * @return long Tempo de execução
-     */ 
-    public static long quicksort(int[] vetor) {
+     * 
+     * @param array Vetor para ser ordenado
+     * 
+     * @return int[] Vetor ordenado
+     */
+    static int[] mergeSort(int[] array) {
+        return mergeSort(array, 0, (array.length - 1) );
+    }
+    
+    /**
+     * Ordena vetor de inteiros usando o algoritmo mergesort 
+     * 
+     * 
+     * @param array Vetor para ser ordenado
+     * @param start De qual posição começará a ser ordenado
+     * @param end Até qual posição irá ser ordenado
+     * 
+     * @return int[] Vetor ordenado
+     */
+    static int[] mergeSort(int[] array, int start, int end) {
+        if (start < end) {
+            int half = (start + end) / 2;
+            
+            mergeSort(array, start, half);
+            mergeSort(array, (half + 1), end);
+            merge(array, start, half, end);
+        }
+        
+        return array;
+    }
+    
+    static void merge(int[] array, int start, int half, int end) {
+        int lefty = half - start + 1;
+        int righty = end - half;
+        int[] arrayLeft = new int [lefty + 1];
+        int[] arrayRight = new int [righty + 1];        
+        
+        for (int i = 0; i < lefty; i++) {
+            arrayLeft[i] = array[start + i];
+        }        
+        for (int i = 0; i < righty; i++) {
+            arrayRight[i] = array[half + i + 1];
+        }
+        
+        arrayLeft[lefty] = Integer.MAX_VALUE;
+        arrayRight[righty] = Integer.MAX_VALUE;        
+        
+        int m = 0;
+        int n = 0;
+        
+        for (int i = start; i <= end; i++) {
+            if (arrayLeft[m] < arrayRight[n]) {
+                array[i] = arrayLeft[m];
+                m++;
+            } else {
+                array[i] = arrayRight[n];
+                n++;
+            }
+        }
+    }
+    
+    
+    
+    /**
+     * Ordena vetor de inteiros usando o algoritmo mergesort e calcula quantas
+     * chamadas recursivas foram efetuadas
+     * 
+     * 
+     * @param array Vetor para ser ordenado
+     * 
+     * @return int Número de chamadas recursivas efetuadas
+     */
+    static int mergeSort2(int[] array) {
+        calls = 0;
+        mergeSort2(array, 0, (array.length - 1) );
+        return calls;
+    }
+
+    static int[] mergeSort2(int[] array, int start, int end) {
+        if (start < end) {
+            int half = (start + end) / 2;
+            
+            mergeSort2(array, start, half);
+            calls++;
+            mergeSort2(array, (half + 1), end);
+            calls++;
+            merge(array, start, half, end);
+        }
+        
+        return array;
+    }
+    
+    /**
+     * Ordena vetor de inteiros usando o algoritmo mergesort e calcula o tempo
+     * que foi necessário para ordenar
+     * 
+     * 
+     * @param array Vetor para ser ordenado
+     * 
+     * @return long Tempo que levou para ordenar o vetor, em ns
+     */
+    static long mergeSort3(int[] array) {
         long startTime = System.nanoTime();
-        quicksort(vetor, 0, vetor.length - 1);
+        mergeSort(array, 0, (array.length - 1) );
         long endTime = System.nanoTime();
         return endTime - startTime;
     }
 
-    /**
-     * Ordena um vetor usando o algoritmo QuickSort
-     *
-     * Pior caso - O(n²)
-     * Melhor caso - O(n log n)
-     * Caso médio - O(n log n) 
-     * Espaço necessário - O(1)
-     *
-     * @param vetor Vetor que será ordenado
-     * @param esq A partir de qual posição o vetor será ordenado
-     * @param dir Até qual posição o vetor será ordenado
-     */
-    public static void quicksort(int[] vetor, int esq, int dir) {
-        int meio = separar(vetor, esq, dir);
-        if (esq < meio - 1) {
-            quicksort(vetor, esq, meio - 1);
-        }
-        if (meio < dir) {
-            quicksort(vetor, meio, dir);
-        }
-    }
+    
     
     /**
-     *
-     * @param vetor Vetor que será separado
-     * @param esq De qual posição o vetor será ordenado
-     * @param dir Até qual posição o vetor será ordenado
+     * Cria vetor de inteiros
      * 
-     * @return int[] Posição em que o pivô ficou
-     */
-    public static int separar(int[] vetor, int esq, int dir) {
-        int pivo = vetor[(esq + dir) / 2];
-        while (esq < dir) {
-            while (vetor[esq] < pivo) {
-                esq++;
-            }
-            while (vetor[dir] > pivo) {
-                dir--;
-            }
-            if (esq <= dir) {
-                swap(vetor, esq, dir);
-                esq++;
-                dir--;
-            }
-        }
-
-        return esq;
-    }
-
-    /**
-     *
-     * @param vetor Vetor que a troca será feita
-     * @param a Posição que será trocada
-     * @param b Posição que será trocada
-     */
-    public static void swap(int[] vetor, int a, int b) {
-        int aux = vetor[a];
-        vetor[a] = vetor[b];
-        vetor[b] = aux;
-    }
-    
-    /**
      * 
      * @param n Tamanho do vetor a ser criado
      * @param min Menor valor possível a ser criado no vetor
@@ -152,41 +182,22 @@ public class APS_analiseAlgoritmos {
         }
         
         return vetor;
-    }
+    }    
     
-    
-    
-    public static void quicksort2(int[] vetor) {
-        quicksort2(vetor, 0, vetor.length - 1);
-    }
-    
-    public static void quicksort2(int[] vetor, int esq, int dir) {
-        int meio = separar2(vetor, esq, dir);
-        if (esq < meio - 1) {
-            quicksort2(vetor, esq, meio - 1);
-        }
-        if (meio < dir) {
-            quicksort2(vetor, meio, dir);
-        }
-    }
-    
-    public static int separar2(int[] vetor, int esq, int dir) {
-        int pivo = vetor[(esq + dir) / 2];
-        while (esq < dir) {
-                chamadas++;
-            while (vetor[esq] < pivo) {
-                esq++;
+    /**
+     * Imprime vetor de inteiros na tela
+     * 
+     * 
+     * @param array Vetor de inteiros a ser impresso na tela
+     */
+    static void printArray(int[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (i % 20 == 0) {
+                System.out.println("");
             }
-            while (vetor[dir] > pivo) {
-                dir--;
-            }
-            if (esq <= dir) {
-                swap(vetor, esq, dir);
-                esq++;
-                dir--;
-            }
+            System.out.print(array[i] + " / ");
         }
-
-        return esq;
+        System.out.println("");
+        System.out.println("");
     }
 }
